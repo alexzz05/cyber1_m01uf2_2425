@@ -27,7 +27,7 @@ IP_CLIENT=`echo "$DATA" | cut -d " " -f 2`
 
 echo "4. SEND OK/KO_HEADER"
 
-echo "OK/KO_HEADER" | nc $IP_CLIENT $PORT
+echo "OK_HEADER" | nc $IP_CLIENT $PORT
 
 echo "5.1 LISTEN NUM_FILES"
 
@@ -67,7 +67,7 @@ then
         exit 22
 fi
 
-echo "OK/KO_NUM_FILES" | nc $IP_CLIENT $PORT
+echo "OK_NUM_FILES" | nc $IP_CLIENT $PORT
 
 for NUM in `seq $NUM_FILES`
 do
@@ -92,13 +92,13 @@ do
 
         echo "10. SEND OK/KO_FILE_NAME"
 
-        echo "OK/KO_FILE_NAME" | nc $IP_CLIENT $PORT
+        echo "OK_FILE_NAME" | nc $IP_CLIENT $PORT
 
         echo "11. LISTEN FILE DATA"
 
         nc -l $PORT > $WORKING_DIR/$FILE_NAME
 
-        echo "14. SEND KO/OK_FILEDATA"
+        echo "14. SEND OK/KO_FILEDATA"
 
         DATA=`cat $WORKING_DIR/$FILE_NAME | wc -c` 
 
@@ -111,7 +111,7 @@ do
                 exit 4
         fi	
 	
-	echo "OK/KO_FILE_DATA" | nc $IP_CLIENT $PORT
+	echo "OK_FILE_DATA" | nc $IP_CLIENT $PORT
 
         echo "15. LISTEN FILE_DATA_MD5"
         
