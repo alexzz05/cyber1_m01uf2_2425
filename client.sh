@@ -23,13 +23,13 @@ echo "1. SEND HEADER (Client: $IP_CLIENT, SERVER: $IP_SERVER)"
 
 echo "LSTP_1 $IP_CLIENT" | nc $IP_SERVER $PORT
 
-echo "2.LISTEN OK_HEADER"
+echo "2.LISTEN OK/KO_HEADER"
 
 DATA=`nc -l $PORT`
 
-echo "6. CHECK OK_HEADER"
+echo "6. CHECK OK/KO_HEADER"
 
-if [ "$DATA" != "OK_HEADER" ]
+if [ "$DATA" != "OK/KO_HEADER" ]
 then
         echo "ERROR 1: HEADER enviado incorrectamente"
 
@@ -48,9 +48,9 @@ echo "NUM_FILES $NUM_FILES" | nc $IP_SERVER $PORT
 
 DATA=`nc -l $PORT`
 
-echo "7.2 CHECK OK_NUM_FILES"
+echo "7.2 CHECK OK/KO_NUM_FILES"
 
-if [ "$DATA" != "OK_NUM_FILES" ]
+if [ "$DATA" != "OK/KO_NUM_FILES" ]
 then
         echo "ERROR 21: NUM_FILES enviado incorrectamente"
 
@@ -71,7 +71,7 @@ do
 
         DATA=`nc -l $PORT`
 
-        if [ "$DATA" != "OK_FILE_NAME" ]
+        if [ "$DATA" != "OK/KO_FILE_NAME" ]
         then
                 echo "ERROR 2: FILE_NAME mal enviado"
 
@@ -86,7 +86,7 @@ do
 
         DATA=`nc -l $PORT`
 
-        if [ "$DATA" != "OK_FILE_DATA" ]
+        if [ "$DATA" != "OK/KO_FILE_DATA" ]
         then
                 echo "ERROR 3: Error al enviar los datos"
 
@@ -103,7 +103,7 @@ do
 
         DATA=`nc -l $PORT`
 
-        if [ "$DATA" != "OK_FILE_DATA_MD5" ]
+        if [ "$DATA" != "OK/KO_FILE_DATA_MD5" ]
         then
                 echo "ERROR 4: FILE_DATA_MD5 mal enviado"
 
