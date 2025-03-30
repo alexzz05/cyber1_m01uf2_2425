@@ -18,7 +18,7 @@ if [ "$HEADER" != "LSTP_1" ]
 then
         echo "ERROR1: Header mal formado $DATA"
 
-        echo "KO/KO_HEADER" | nc $IP_CLIENT $PORT
+        echo "KO_HEADER" | nc $IP_CLIENT $PORT
 
         exit 1
 fi
@@ -41,7 +41,7 @@ if [ "$PREFIX" != "NUM_FILES" ]
 then
         echo "ERROR: PREFIX incorrecto"
 
-        echo "KO/KO_PREFIX" | nc $IP_CLIENT $PORT
+        echo "KO_PREFIX" | nc $IP_CLIENT $PORT
 
         exit
 fi
@@ -54,7 +54,7 @@ if [ "$NUM_FILES_CHECK" == "" ]
 then
         echo "ERROR 22: Número de archivos incorrecto (no es un número)"
 
-        echo "KO/KO_NUM_FILES" | nc $IP_CLIENT $PORT
+        echo "KO_NUM_FILES" | nc $IP_CLIENT $PORT
 
         exit 22
 fi
@@ -62,7 +62,7 @@ if [ "$NUM_FILES" -lt 1 ]
 then
         echo "ERROR 22: NUM_FILES incorrecto"
 
-        echo "KO/KO_NUM_FILE" | nc $IP_CLIENT $PORT
+        echo "KO_NUM_FILE" | nc $IP_CLIENT $PORT
 
         exit 22
 fi
@@ -83,7 +83,7 @@ do
         then
                 echo "ERROR 2: FILE_NAME incorrecto"
 
-                echo "KO/KO_FILE_NAME" | nc $IP_CLIENT $PORT
+                echo "KO_FILE_NAME" | nc $IP_CLIENT $PORT
 
                 exit 3
         fi
@@ -106,7 +106,7 @@ do
         then
                 echo "ERROR 3: Datos mal formados (vacíos)"
 
-                echo "KO/KO_FILE_DATA" | nc $IP_CLIENT $PORT
+                echo "KO_FILE_DATA" | nc $IP_CLIENT $PORT
 
                 exit 4
         fi	
@@ -125,7 +125,7 @@ do
         then
                 echo "ERROR 4: FILE_DATA_MD5 incorrecto"
 
-                echo "KO/KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
+                echo "KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
 
                 exit 4
         fi
@@ -138,13 +138,13 @@ do
         then
                 echo "ERROR 5: HASH enviado y local distintos"
 
-                echo "KO/KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
+                echo "KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
 
                 exit 6
         fi
         echo "19. SEND_OK/KO_FILE_DATA_MD5"
 
-        echo "OK/KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
+        echo "OK_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
 
 done
 
