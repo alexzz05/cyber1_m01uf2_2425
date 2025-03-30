@@ -25,13 +25,13 @@ echo "1. SEND HEADER"
 
 echo "LSTP_1.1 $IP_CLIENT" | nc $IP_SERVER $PORT
 
-echo "2. LISTEN OK_HEADER"
+echo "2. LISTEN OK/KO_HEADER"
 
 DATA=`nc -l $PORT`
 
-echo "6. CHECK OK_HEADER"
+echo "6. CHECK OK/KO_HEADER"
 
-if [ "$DATA" != "OK_HEADER"  ]; then
+if [ "$DATA" != "OK/KO_HEADER"  ]; then
 
 	echo "ERROR 1: Header not sent correctly. $DATA"
 
@@ -46,11 +46,11 @@ echo "7. SEND FILE_NAME"
 
 echo "FILE_NAME $FILE" | nc $IP_SERVER $PORT
 
-echo "8. LISTEN PREFIX_OK"
+echo "8. LISTEN PREFIX_OK/KO"
 
 DATA=`nc -l $PORT`
 
-if [ "$DATA" != "OK_FILE_NAME" ]; then
+if [ "$DATA" != "OK/KO_FILE_NAME" ]; then
 	
 	echo "ERROR 2: Filename not set correctly. $DATA"
 
@@ -62,13 +62,13 @@ echo "12. SEND FILE_DATA"
 
 cat "client/$FILE" | nc $IP_SERVER $PORT
 
-echo "13. LISTEN OK_FILE_DATA"
+echo "13. LISTEN OK/KO_FILE_DATA"
 
 DATA=`nc -l $PORT`
 
-echo "16. CHECK OK_FILE_DATA"
+echo "16. CHECK OK/KO_FILE_DATA"
 
-if [ "$DATA" != "OK_FILE_DATA" ]; then
+if [ "$DATA" != "OK/KO_FILE_DATA" ]; then
 
 	echo "ERROR 3: No data in sent file. $DATA"
 
@@ -82,17 +82,16 @@ MD5=`cat "client/$FILE" | md5sum | cut -d " " -f 1`
 
 echo "$MD5" | nc $IP_SERVER $PORT
 
-echo "18. LISTEN OK_MD5"
+echo "18. LISTEN OK/KO_MD5"
 
 DATA=`nc -l $PORT`
 
-echo "21. CHECK OK_MD5"
+echo "21. CHECK OK/KO_MD5"
 
-if [ $DATA != "OK_FILE_DATA_MD5" ]; then
+if [ $DATA != "OK/KO_FILE_DATA_MD5" ]; then
 	
 	echo "ERROR 4: MD5 not coincident."
 
 fi
 
 exit 0
-
