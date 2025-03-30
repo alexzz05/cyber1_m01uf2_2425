@@ -29,7 +29,7 @@ DATA=`nc -l $PORT`
 
 echo "6. CHECK OK/KO_HEADER"
 
-if [ "$DATA" != "OK/KO_HEADER" ]
+if [ "$DATA" != "OK_HEADER" ]
 then
         echo "ERROR 1: HEADER enviado incorrectamente"
 
@@ -50,7 +50,7 @@ DATA=`nc -l $PORT`
 
 echo "7.2 CHECK OK/KO_NUM_FILES"
 
-if [ "$DATA" != "OK/KO_NUM_FILES" ]
+if [ "$DATA" != "OK_NUM_FILES" ]
 then
         echo "ERROR 21: NUM_FILES enviado incorrectamente"
 
@@ -71,7 +71,7 @@ do
 
         DATA=`nc -l $PORT`
 
-        if [ "$DATA" != "OK/KO_FILE_NAME" ]
+        if [ "$DATA" != "OK_FILE_NAME" ]
         then
                 echo "ERROR 2: FILE_NAME mal enviado"
 
@@ -86,7 +86,7 @@ do
 
         DATA=`nc -l $PORT`
 
-        if [ "$DATA" != "OK/KO_FILE_DATA" ]
+        if [ "$DATA" != "OK_FILE_DATA" ]
         then
                 echo "ERROR 3: Error al enviar los datos"
 
@@ -103,7 +103,7 @@ do
 
         DATA=`nc -l $PORT`
 
-        if [ "$DATA" != "OK/KO_FILE_DATA_MD5" ]
+        if [ "$DATA" != "OK_FILE_DATA_MD5" ]
         then
                 echo "ERROR 4: FILE_DATA_MD5 mal enviado"
 
