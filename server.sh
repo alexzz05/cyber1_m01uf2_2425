@@ -1,97 +1,153 @@
 #!/bin/bash
 
 PORT=7777
+IP_CLIENT="localhost"
+WORKING_DIR="server"
 
-echo "LSTP server (Lechuga Speaker Transfer Protocol)"
+echo "LSTP Server (Lechuga Speaker Transfer Protocol)"
 
-echo "0. LISTEN"
+echo "0.LISTEN"
 
 DATA=`nc -l $PORT`
-
-PROTOCOL_PREFIX=`echo "$DATA" | cut -d " " -f 1`
 
 echo "3. CHECK HEADER"
 
+HEADER=`echo "$DATA" | cut -d " " -f 1`
+
+if [ "$HEADER" != "LSTP_1" ]
+then
+        echo "ERROR1: Header mal formado $DATA"
+
+        echo "KO_HEADER" | nc $IP_CLIENT $PORT
+
+        exit 1
+fi
+
 IP_CLIENT=`echo "$DATA" | cut -d " " -f 2`
 
-if [ "$PROTOCOL_PREFIX" != "LSTP_1.1"  ]; then
+echo "4. SEND OK_HEADER"
 
-	echo "ERROR 1: Header malformed. $DATA"
+echo "OK_HEADER" | nc $IP_CLIENT $PORT
 
-	echo "KO/KO_HEADER" | nc $IP_CLIENT $PORT
-
-	exit 1
-fi
-
-echo "4. SEND OK/KO_HEADER"
-
-echo "OK/KO_HEADER" | nc $IP_CLIENT $PORT
-
-echo "5. LISTEN FILE_NAME"
+echo "5.1 LISTEN NUM_FILES"
 
 DATA=`nc -l $PORT`
 
-FILE_NAME_PREFIX=`echo "$DATA" | cut -d " " -f 1`
+echo "5.2 CHECK NUM_FILES"
 
-echo "9. CHECK FILE_NAME"
+PREFIX=`echo $DATA | cut -d " " -f 1`
 
-if [ "$FILE_NAME_PREFIX" != "FILE_NAME"  ]; then
+if [ "$PREFIX" != "NUM_FILES" ]
+then
+        echo "ERROR: PREFIX incorrecto"
+
+        echo "KO_PREFIX" | nc $IP_CLIENT $PORT
+
+        exit
+fi
+
+NUM_FILES=`echo $DATA | cut -d " " -f 2`
+
+NUM_FILES_CHECK=`echo "$NUM_FILES" | grep -E "^-?[0-9]+$"`
+
+if [ "$NUM_FILES_CHECK" == "" ]
+then
+        echo "ERROR 22: Número de archivos incorrecto (no es un número)"
+
+        echo "KO_NUM_FILES" | nc $IP_CLIENT $PORT
+
+        exit 22
+fi
+if [ "$NUM_FILES" -lt 1 ]
+then
+        echo "ERROR 22: NUM_FILES incorrecto"
+
+        echo "KO_NUM_FILE" | nc $IP_CLIENT $PORT
+
+        exit 22
+fi
+
+echo "OK_NUM_FILES" | nc $IP_CLIENT $PORT
+
+for NUM in `seq $NUM_FILES`
+do
+        echo "5.X LISTEN FILE_NAME $NUM"
+
+        DATA=`nc -l $PORT`
+
+        echo "9. CHECK FILE_NAME"
+
+        PREFIX=`echo $DATA | cut -d " " -f 1`
+
+        if [ "$PREFIX" != "FILE_NAME" ]
+        then
+                echo "ERROR 2: FILE_NAME incorrecto"
+
+                echo "KO_FILE_NAME" | nc $IP_CLIENT $PORT
+
+                exit 3
+        fi
+
+        FILE_NAME=`echo $DATA | cut -d " " -f 2`
+
+        echo "10. SEND OK_FILE_NAME"
+
+        echo "OK_FILE_NAME" | nc $IP_CLIENT $PORT
+
+        echo "11. LISTEN FILE DATA"
+
+        nc -l $PORT > $WORKING_DIR/$FILE_NAME
+
+        echo "14. SEND KO/OK_FILEDATA"
+
+        DATA=`cat $WORKING_DIR/$FILE_NAME | wc -c` 
 	
-	echo "ERROR 2: Prefix unknown. $DATA"
+	if [ $DATA -eq 0 ]
+        then
+                echo "ERROR 3: Datos mal formados (vacíos)"
 
-	echo "KO/KO_FILE_NAME"
+                echo "KO_FILE_DATA" | nc $IP_CLIENT $PORT
+
+                exit 4
+        fi	
 	
-	exit 2
+	echo "OK_FILE_DATA" | nc $IP_CLIENT $PORT
 
-fi
+        echo "15. LISTEN FILE_DATA_MD5"
+        
+        DATA=`nc -l $PORT`
 
-FILE_NAME=`echo "$DATA" | cut -d " " -f 2`
+        echo "18. CHECK FILE_DATA_MD5"
 
-echo "10. SEND OK/KO_FILE_NAME"
+        PREFIX=`echo $DATA | cut -d " " -f 1`
 
-echo "OK/KO_FILE_NAME" | nc $IP_CLIENT $PORT
+        if [ "$PREFIX" != "FILE_DATA_MD5" ]
+        then
+                echo "ERROR 4: FILE_DATA_MD5 incorrecto"
 
-echo "11. LISTEN FILE_DATA"
+                echo "KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
 
-nc -l $PORT > server/$FILE_NAME
+                exit 4
+        fi
 
-echo "14. SEND OK/KO_FILE_DATA"
+        RECEIVED_MD5=`echo $DATA | cut -d " " -f 2`
 
-FILE_SIZE=`ls -l server/$FILE_NAME | cut -d " " -f 5`
+        LOCAL_MD5=`md5sum $WORKING_DIR/$FILE_NAME | cut -d " " -f 1`
 
-if [ $FILE_SIZE -eq 0 ]; then
+        if [ "$RECEIVED_MD5" != "$LOCAL_MD5" ]
+        then
+                echo "ERROR 5: HASH enviado y local distintos"
 
-	echo "ERROR 3: No file data. File size: $FILE_SIZE B."
+                echo "KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
 
-	echo "KO/KO_FILE_DATA"
+                exit 6
+        fi
+        echo "19. SEND_OK_FILE_DATA_MD5"
 
-	exit 3
+        echo "OK_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
 
-fi
+done
 
-echo "OK/KO_FILE_DATA" | nc $IP_CLIENT $PORT
-
-echo "15. LISTEN MD5"
-
-DATA=`nc -l $PORT`
-
-MD5_COMPROBAR=`cat "server/$FILE_NAME" | md5sum | cut -d " " -f 1`
-
-echo "19. CHECK MD5"
-
-if [ $DATA != $MD5_COMPROBAR ]; then
-
-	echo "KO/KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
-	echo "ERROR 4: File data corrupted."
-	echo "Original md5: $DATA"
-	echo "Checked md5: $MD5_COMPROBAR"
-
-fi
-
-echo "20. SEND OK/KO_MD5"
-
-echo "OK/KO_FILE_DATA_MD5" | nc $IP_CLIENT $PORT
-
-echo "END"
+echo "FIN"
 
 exit 0
